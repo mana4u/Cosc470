@@ -13,11 +13,20 @@ func main() {
 	sendTime := time.Now()
 	
 	//encoding time to byte
-	buf, _ := sendTime.MarshalText()
+	buf := timeToBytes(sendTime)
 	
 	//display sent time
 	fmt.Printf("Packet was sent at: %s\n", sendTime)
 	
 	//send to socket
     conn.Write(buf)
+}
+
+func timeToBytes(t time.Time) []byte {
+	nsec := t.UnixNano()
+	b := make([]byte, 8)
+	for i := uint8(0); i < 8; i++ {
+		b[i] = byte((nsec >> ((7 - i) * 8)) & 0xff)
+	}
+	return b
 }
