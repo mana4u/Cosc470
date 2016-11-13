@@ -33,15 +33,22 @@ func handleClient(conn net.Conn) {
 	recieveTime := time.Now()
 	
 	// create new time and set time to what is in buf
-	sentTime := new(time.Time)
-	sentTime.UnmarshalText(buf[:n])
+	sentTime := bytesToTime(buf[:n])
 	
 	// find diffrence between sent time and recieved Time
-	travelTime := recieveTime.Sub(*sentTime)
+	travelTime := recieveTime.Sub(sentTime)
 	
 	// display them
 	fmt.Printf("Packet was sent at: %s\n", sentTime)
 	fmt.Printf("Traveling time: %s\n", travelTime)
 
 
+}
+
+func bytesToTime(b []byte) time.Time {
+	var nsec int64
+	for i := uint8(0); i < 8; i++ {
+		nsec += int64(b[i]) << ((7 - i) * 8)
+	}
+	return time.Unix(nsec/1000000000, nsec%1000000000)
 }
