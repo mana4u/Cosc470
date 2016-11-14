@@ -162,73 +162,74 @@ func main() {
 		Addr: [4]byte{127, 0, 0, 1},
 	}
 
-  fmt.Println("Enter tcp, udp, or icmp")
+  	fmt.Println("Enter tcp, udp, or icmp")
 	var input string
 	fmt.Scanln(&input)
-switch input {
-case "tcp":
+	
+	switch input {
+	case "tcp":
 		var err error
-			h := Header{
-				Version:  4,
-				Len:      20,
-				TotalLen: 20, // 20 bytes for IP, 10 for ICMP
-				TTL:      64,
-				Protocol: 6, // TCP
-				Dst:      net.IPv4(127, 0, 0, 1),
-				// ID, Src and Checksum will be set for us by the kernel
-			}
-			out, err := h.Marshal()
-			if err != nil {
-				log.Fatal(err)
-			}
-			err = syscall.Sendto(fd, out, 0, &addr)
-			if err != nil {
-				log.Fatal("Sendto:", err)
-			}
+		h := Header{
+			Version:  4,
+			Len:      20,
+			TotalLen: 20, // 20 bytes for IP, 10 for ICMP
+			TTL:      64,
+			Protocol: 6, // TCP
+			Dst:      net.IPv4(127, 0, 0, 1),
+			// ID, Src and Checksum will be set for us by the kernel
+		}
+		out, err := h.Marshal()
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = syscall.Sendto(fd, out, 0, &addr)
+		if err != nil {
+			log.Fatal("Sendto:", err)
+		}
 	  case "udp":
-				var err error
-			h := Header{
-				Version:  4,
-				Len:      20,
-				TotalLen: 20, // 20 bytes for IP, 10 for ICMP
-				TTL:      64,
-				Protocol: 17, // UDP
-				Dst:      net.IPv4(127, 0, 0, 1),
-				// ID, Src and Checksum will be set for us by the kernel
-			}
-			out, err := h.Marshal()
-			if err != nil {
-				log.Fatal(err)
-			}
-			err = syscall.Sendto(fd, out, 0, &addr)
-			if err != nil {
-				log.Fatal("Sendto:", err)
-			}
-		case "icmp":
-				var err error
-			h := Header{
-				Version:  4,
-				Len:      20,
-				TotalLen: 20, // 20 bytes for IP, 10 for ICMP
-				TTL:      64,
-				Protocol: 1, // ICMP
-				Dst:      net.IPv4(127, 0, 0, 1),
-				// ID, Src and Checksum will be set for us by the kernel
-			}
+		var err error
+		h := Header{
+			Version:  4,
+			Len:      20,
+			TotalLen: 20, // 20 bytes for IP, 10 for ICMP
+			TTL:      64,
+			Protocol: 17, // UDP
+			Dst:      net.IPv4(127, 0, 0, 1),
+			// ID, Src and Checksum will be set for us by the kernel
+		}
+		out, err := h.Marshal()
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = syscall.Sendto(fd, out, 0, &addr)
+		if err != nil {
+			log.Fatal("Sendto:", err)
+		}
+	case "icmp":
+		var err error
+		h := Header{
+			Version:  4,
+			Len:      20,
+			TotalLen: 20, // 20 bytes for IP, 10 for ICMP
+			TTL:      64,
+			Protocol: 1, // ICMP
+			Dst:      net.IPv4(127, 0, 0, 1),
+			// ID, Src and Checksum will be set for us by the kernel
+		}
 
-			icmp := []byte{
-				8, // type: echo request
-				0, // code: not used by echo request
-				0, // checksum (16 bit), we fill in below
-				0,
-				0, // identifier (16 bit). zero allowed.
-				0,
-				0, // sequence number (16 bit). zero allowed.
-				0,
-				0xC0, // Optional data. ping puts time packet sent here
-				0xDE,
-			}
-			cs := csum(icmp)
+		icmp := []byte{
+			8, // type: echo request
+			0, // code: not used by echo request
+			0, // checksum (16 bit), we fill in below
+			0,
+			0, // identifier (16 bit). zero allowed.
+			0,
+			0, // sequence number (16 bit). zero allowed.
+			0,
+			0xC0, // Optional data. ping puts time packet sent here
+			0xDE,
+		}
+		cs := csum(icmp)
 		icmp[2] = byte(cs)
 		icmp[3] = byte(cs >> 8)
 
@@ -238,10 +239,10 @@ case "tcp":
 		}
 		ic := append(out, icmp...)
 
-			err = syscall.Sendto(fd, ic, 0, &addr)
-			if err != nil {
-				log.Fatal("Sendto:", err)
-			}
+		err = syscall.Sendto(fd, ic, 0, &addr)
+		if err != nil {
+			log.Fatal("Sendto:", err)
+		}
 		default: break
 	}
 
